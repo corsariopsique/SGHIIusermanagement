@@ -1,7 +1,7 @@
 package com.sghii.gestorusuariossghii.config;
 
-import com.sghii.gestorusuariossghii.gestorsesiones.CustomAuthenticationProvider;
-import com.sghii.gestorusuariossghii.gestorsesiones.JwtTokenFilter;
+import com.sghii.gestorusuariossghii.servicio.CustomAuthenticationProvider;
+import com.sghii.gestorusuariossghii.servicio.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,7 @@
-package com.sghii.gestorusuariossghii.gestorsesiones;
+package com.sghii.gestorusuariossghii.servicio;
 
 
+import com.sghii.gestorusuariossghii.modelo.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;

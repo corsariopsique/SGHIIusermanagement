@@ -1,4 +1,4 @@
-package com.sghii.gestorusuariossghii.gestorsesiones;
+package com.sghii.gestorusuariossghii.modelo;
 
 public class TokenDto {
 

@@ -1,9 +1,9 @@
 package com.sghii.gestorusuariossghii.controlador;
 
 
-import com.sghii.gestorusuariossghii.gestorsesiones.JwtTokenProvider;
-import com.sghii.gestorusuariossghii.gestorsesiones.TokenDto;
-import com.sghii.gestorusuariossghii.gestorsesiones.UserDto;
+import com.sghii.gestorusuariossghii.servicio.JwtTokenProvider;
+import com.sghii.gestorusuariossghii.modelo.TokenDto;
+import com.sghii.gestorusuariossghii.modelo.UserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,10 +79,8 @@ public class AuthController {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            if (tokenProvider.validateToken(token)) {
-                var user = userDetailsService.loadUserByUsername(tokenProvider.getUsername(token));
-                return ResponseEntity.ok(new UsernamePasswordAuthenticationToken(user.getUsername(), null, user.getAuthorities()));
-            }
+            var user = userDetailsService.loadUserByUsername(tokenProvider.getUsername(token));
+            return ResponseEntity.ok(new UsernamePasswordAuthenticationToken(user.getUsername(), null, user.getAuthorities()));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

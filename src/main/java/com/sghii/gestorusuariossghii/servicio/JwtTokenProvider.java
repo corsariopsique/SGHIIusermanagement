@@ -1,4 +1,4 @@
-package com.sghii.gestorusuariossghii.gestorsesiones;
+package com.sghii.gestorusuariossghii.servicio;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
