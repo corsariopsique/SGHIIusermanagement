@@ -1,9 +1,9 @@
 package com.sghii.gestorusuariossghii.controlador;
 
-
 import com.sghii.gestorusuariossghii.servicio.JwtTokenProvider;
 import com.sghii.gestorusuariossghii.modelo.TokenDto;
 import com.sghii.gestorusuariossghii.modelo.UserDto;
+import com.sghii.gestorusuariossghii.servicio.KeyGeneratorUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,7 +39,6 @@ public class AuthController {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
 
     @PostMapping("/register")
     public ResponseEntity<String> registrarUsuario(@RequestBody UserDto user){
@@ -84,5 +83,11 @@ public class AuthController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+  //  @GetMapping("/generate")
+   // public ResponseEntity<String> generate () throws Exception {
+     //   KeyGeneratorUtil generator = new KeyGeneratorUtil();
+      //  return ResponseEntity.ok(generator.getKeyEncoded());
+   // }
 
 }

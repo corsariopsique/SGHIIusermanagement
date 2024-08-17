@@ -3,13 +3,14 @@ package com.sghii.gestorusuariossghii.servicio;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 
 @Component
@@ -18,9 +19,14 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long validityInMilliseconds;
 
-    private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String key;
 
     public String generateToken(Authentication authentication) {
+
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        keyBytes = Arrays.copyOf(keyBytes, 32);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
 
         String username = authentication.getName();
         Date now = new Date();
@@ -28,15 +34,21 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("authorities", authentication.getAuthorities())
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(key)
+                .signWith(secretKey)
                 .compact();
     }
 
     public String getUsername(String token) {
+
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        keyBytes = Arrays.copyOf(keyBytes, 32);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -44,9 +56,14 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
+
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        keyBytes = Arrays.copyOf(keyBytes, 32);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
             return true;
