@@ -55,7 +55,6 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
     }
-
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody UserDto dataLogin) {
         try {
