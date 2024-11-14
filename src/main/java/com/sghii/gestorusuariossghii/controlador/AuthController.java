@@ -1,5 +1,6 @@
 package com.sghii.gestorusuariossghii.controlador;
 
+import com.sghii.gestorusuariossghii.modelo.UpdateUserDto;
 import com.sghii.gestorusuariossghii.servicio.JwtTokenProvider;
 import com.sghii.gestorusuariossghii.modelo.TokenDto;
 import com.sghii.gestorusuariossghii.modelo.UserDto;
@@ -8,9 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.util.Collections;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,6 +44,7 @@ public class AuthController {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register")
     public ResponseEntity<String> registrarUsuario(@RequestBody UserDto user){
         JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
@@ -55,6 +60,58 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> eliminarUsuario (@RequestBody UserDto user){
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
+
+        if (manager.userExists(user.getUsername())) {
+
+            manager.deleteUser(user.getUsername());
+            return ResponseEntity.ok("Usuario eliminado exitosamente");
+
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/update")
+    public ResponseEntity<String> actualizaUsuario (@RequestBody UpdateUserDto user){
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
+
+        if (manager.userExists(user.getUsername())) {
+
+            UserDetails userSpring = User.withUsername(user.getUsername())
+                    .password(passwordEncoder.encode(user.getNewPassword()))
+                    .roles(user.getRole())
+                    .disabled(user.isEstado())
+                    .build();
+            manager.updateUser(userSpring);
+            return ResponseEntity.ok("Usuario actualizado exitosamente");
+
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+        }
+    }
+
+    @PutMapping("/changePWD")
+    public ResponseEntity <String> cambioPassword(@RequestBody UpdateUserDto user){
+
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
+
+        if (Objects.equals(user.getUsername(), ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())) {
+
+            manager.changePassword(user.getOldPassword(), passwordEncoder.encode(user.getNewPassword()));
+            return ResponseEntity.ok("Contraseña del usuario " + user.getUsername() + " ha sido actualizada correctamente");
+
+        }else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Datos de usuario no validados");
+        }
+
+    }
+
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody UserDto dataLogin) {
         try {

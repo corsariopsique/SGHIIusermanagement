@@ -1,0 +1,23 @@
+Commit: 5e54b3947167030e2543f0fcb4b2afcf8c7ac998
+Author: corsariopsique <maordo16@gmail.com>
+Date: Sat Oct 5 08:16:26 2024 -0500
+Message: cambios webconfig cors
+
+
+Commit: 2b742b3aff3808047bf4d425db0bbe1907b0f2ac
+Author: corsariopsique <maordo16@gmail.com>
+Date: Sat Aug 17 00:34:14 2024 -0500
+Message: mejora validacion tokens, envio authorities en token, generador de llaves 256bits temporal
+
+
+Commit: 7546f13038b78d5d3cea273b11d94d63ad0e230e
+Author: corsariopsique <maordo16@gmail.com>
+Date: Fri Aug 16 15:20:23 2024 -0500
+Message: correccion nombre paquetes, validation single, esquema MVC
+
+
+Commit: ebf3f1c3a7c094a77df9abf12426a9dfebccc9e1
+Author: corsariopsique <maordo16@gmail.com>
+Date: Fri Aug 16 10:47:11 2024 -0500
+Message: inicio repositorio servicio gestion cuentas de usuario SGHII
+
