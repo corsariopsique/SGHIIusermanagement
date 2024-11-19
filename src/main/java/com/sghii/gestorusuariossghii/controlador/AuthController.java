@@ -5,10 +5,12 @@ import com.sghii.gestorusuariossghii.servicio.JwtTokenProvider;
 import com.sghii.gestorusuariossghii.modelo.TokenDto;
 import com.sghii.gestorusuariossghii.modelo.UserDto;
 import com.sghii.gestorusuariossghii.servicio.KeyGeneratorUtil;
+import com.sghii.gestorusuariossghii.servicio.UserManagementService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -99,14 +103,20 @@ public class AuthController {
     @PutMapping("/changePWD")
     public ResponseEntity <String> cambioPassword(@RequestBody UpdateUserDto user){
 
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
         JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
 
-        if (Objects.equals(user.getUsername(), ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())) {
+        try {
+
+            Authentication authentication = verificador.authenticate(
+                    new UsernamePasswordAuthenticationToken(username,user.getOldPassword(), Collections.emptyList())
+            );
 
             manager.changePassword(user.getOldPassword(), passwordEncoder.encode(user.getNewPassword()));
-            return ResponseEntity.ok("Contraseña del usuario " + user.getUsername() + " ha sido actualizada correctamente");
+            return ResponseEntity.ok("Contraseña del usuario " + username + " ha sido actualizada correctamente");
 
-        }else {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Datos de usuario no validados");
         }
 
@@ -129,6 +139,14 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<List<Map<String,Object>>> listarUsuarios () {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        UserManagementService usuariosLista = new UserManagementService (jdbcTemplate);
+        return ResponseEntity.ok(usuariosLista.listarUsuariosConRoles());
+    }
+
     @GetMapping("/validation")
     public ResponseEntity<UsernamePasswordAuthenticationToken> validation(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -140,10 +158,12 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-  //  @GetMapping("/generate")
-   // public ResponseEntity<String> generate () throws Exception {
-     //   KeyGeneratorUtil generator = new KeyGeneratorUtil();
-      //  return ResponseEntity.ok(generator.getKeyEncoded());
-   // }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/generate")
+    public ResponseEntity<String> generate () throws Exception {
+       KeyGeneratorUtil generator = new KeyGeneratorUtil();
+       return ResponseEntity.ok(generator.getKeyEncoded());
+    }
 
 }
